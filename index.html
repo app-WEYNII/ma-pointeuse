@@ -16,8 +16,6 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⏱</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
@@ -485,29 +483,28 @@ function getJsPDF(){
   if(window.jsPDF)return window.jsPDF;
   return null;
 }
+function loadScript(url){
+  return new Promise(function(resolve,reject){
+    var s=document.createElement('script');
+    s.src=url;s.onload=resolve;s.onerror=reject;
+    document.head.appendChild(s);
+  });
+}
 function doExportPDF(){
   var JPDF=getJsPDF();
   if(JPDF){return buildPDF(JPDF);}
-  // Scripts not loaded — try loading dynamically
-  toast('Chargement en cours...');
-  var s1=document.createElement('script');
-  s1.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js';
-  s1.onload=function(){
-    var s2=document.createElement('script');
-    s2.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js';
-    s2.onload=function(){
-      // Wait a tick for scripts to initialize
-      setTimeout(function(){
-        var JP=getJsPDF();
-        if(JP)buildPDF(JP);
-        else toast('Erreur : impossible de charger le module PDF');
-      },300);
-    };
-    s2.onerror=function(){toast('Erreur chargement plugin PDF');};
-    document.head.appendChild(s2);
-  };
-  s1.onerror=function(){toast('Connexion internet requise pour le premier export PDF');};
-  document.head.appendChild(s1);
+  // Load scripts on demand
+  toast('⏳ Préparation du PDF...');
+  loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js')
+  .then(function(){return loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js');})
+  .then(function(){
+    setTimeout(function(){
+      var JP=getJsPDF();
+      if(JP)buildPDF(JP);
+      else toast('Erreur : module PDF non trouvé');
+    },500);
+  })
+  .catch(function(){toast('❌ Connexion internet requise pour le premier PDF');});
 }
 function buildPDF(JPDF){
   var sorted=Object.keys(S.entries).sort();
