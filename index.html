@@ -480,22 +480,39 @@ function doExport(){
 // ═══════════════════════════════════════════════
 // ── PDF EXPORT (relevé d'heures pro) ──
 // ═══════════════════════════════════════════════
+function getJsPDF(){
+  if(window.jspdf&&window.jspdf.jsPDF)return window.jspdf.jsPDF;
+  if(window.jsPDF)return window.jsPDF;
+  return null;
+}
 function doExportPDF(){
-  var JPDF=window.jspdf&&window.jspdf.jsPDF?window.jspdf.jsPDF:(window.jsPDF||null);
-  if(!JPDF){toast('Chargement PDF...');
-    // Try loading dynamically
-    var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js';
-    s.onload=function(){
-      var s2=document.createElement('script');s2.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js';
-      s2.onload=function(){doExportPDF();};s2.onerror=function(){toast('Erreur chargement PDF');};
-      document.head.appendChild(s2);
+  var JPDF=getJsPDF();
+  if(JPDF){return buildPDF(JPDF);}
+  // Scripts not loaded — try loading dynamically
+  toast('Chargement en cours...');
+  var s1=document.createElement('script');
+  s1.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js';
+  s1.onload=function(){
+    var s2=document.createElement('script');
+    s2.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js';
+    s2.onload=function(){
+      // Wait a tick for scripts to initialize
+      setTimeout(function(){
+        var JP=getJsPDF();
+        if(JP)buildPDF(JP);
+        else toast('Erreur : impossible de charger le module PDF');
+      },300);
     };
-    s.onerror=function(){toast('PDF nécessite une connexion internet la première fois');};
-    document.head.appendChild(s);return;
-  }
-  var doc=new JPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    s2.onerror=function(){toast('Erreur chargement plugin PDF');};
+    document.head.appendChild(s2);
+  };
+  s1.onerror=function(){toast('Connexion internet requise pour le premier export PDF');};
+  document.head.appendChild(s1);
+}
+function buildPDF(JPDF){
   var sorted=Object.keys(S.entries).sort();
   if(sorted.length===0){toast('Aucune donnée à exporter');return;}
+  var doc=new JPDF({orientation:'portrait',unit:'mm',format:'a4'});
 
   // Title
   doc.setFont('helvetica','bold');doc.setFontSize(18);doc.setTextColor(15,23,42);
