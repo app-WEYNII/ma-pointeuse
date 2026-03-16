@@ -478,134 +478,98 @@ function doExport(){
 // ═══════════════════════════════════════════════
 // ── PDF EXPORT (relevé d'heures pro) ──
 // ═══════════════════════════════════════════════
-function getJsPDF(){
-  if(window.jspdf&&window.jspdf.jsPDF)return window.jspdf.jsPDF;
-  if(window.jsPDF)return window.jsPDF;
-  return null;
-}
-function loadScript(url){
-  return new Promise(function(resolve,reject){
-    var s=document.createElement('script');
-    s.src=url;s.onload=resolve;s.onerror=reject;
-    document.head.appendChild(s);
-  });
-}
+function getJsPDF(){return null;}
+function loadScript(){return Promise.resolve();}
 function doExportPDF(){
-  var JPDF=getJsPDF();
-  if(JPDF){return buildPDF(JPDF);}
-  // Load scripts on demand
-  toast('⏳ Préparation du PDF...');
-  loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js')
-  .then(function(){return loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js');})
-  .then(function(){
-    setTimeout(function(){
-      var JP=getJsPDF();
-      if(JP)buildPDF(JP);
-      else toast('Erreur : module PDF non trouvé');
-    },500);
-  })
-  .catch(function(){toast('❌ Connexion internet requise pour le premier PDF');});
-}
-function buildPDF(JPDF){
+  // ── Generate a clean HTML page and use native print (Save as PDF on iOS) ──
   var sorted=Object.keys(S.entries).sort();
   if(sorted.length===0){toast('Aucune donnée à exporter');return;}
-  var doc=new JPDF({orientation:'portrait',unit:'mm',format:'a4'});
-
-  // Title
-  doc.setFont('helvetica','bold');doc.setFontSize(18);doc.setTextColor(15,23,42);
-  doc.text("Relevé d'heures de travail",14,20);
-  doc.setFontSize(10);doc.setFont('helvetica','normal');doc.setTextColor(100);
-  doc.text('Exporté le '+dkey(new Date()),14,27);
 
   // Group by week
   var weeks={};var weekOrder=[];
   for(var i=0;i<sorted.length;i++){
     var k=sorted[i],d=pdkey(k);
-    var wk='S'+P(WN(d))+' '+d.getFullYear();
+    var wk='S'+P(WN(d))+' — '+d.getFullYear();
     if(!weeks[wk]){weeks[wk]=[];weekOrder.push(wk);}
     weeks[wk].push(k);
   }
 
-  var startY=35;
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relevé d\'heures</title>';
+  html+='<style>';
+  html+='*{margin:0;padding:0;box-sizing:border-box}';
+  html+='body{font-family:Helvetica,Arial,sans-serif;color:#1e293b;padding:20px;font-size:11px}';
+  html+='h1{font-size:18px;font-weight:800;margin-bottom:2px}';
+  html+='h2{font-size:12px;font-weight:800;margin:16px 0 4px;color:#1e293b}';
+  html+='.sub{font-size:10px;color:#64748b;margin-bottom:16px}';
+  html+='table{width:100%;border-collapse:collapse;margin-bottom:6px}';
+  html+='th{background:#1e293b;color:#fff;padding:5px 6px;text-align:left;font-size:9px;font-weight:700;text-transform:uppercase}';
+  html+='td{padding:4px 6px;border-bottom:1px solid #e2e8f0;font-size:10px}';
+  html+='tr:last-child td{border-bottom:none}';
+  html+='.total-row{background:#f1f5f9;font-weight:700}';
+  html+='.pos{color:#16a34a}.neg{color:#dc2626}';
+  html+='.footer{margin-top:20px;text-align:center;font-size:9px;color:#94a3b8}';
+  html+='@media print{body{padding:10px}@page{margin:12mm}}';
+  html+='</style></head><body>';
+
+  html+='<h1>Relevé d\'heures de travail</h1>';
+  html+='<div class="sub">Exporté le '+dkey(new Date())+'</div>';
+
   for(var wi=0;wi<weekOrder.length;wi++){
     var wLabel=weekOrder[wi];
     var wEntries=weeks[wLabel];
     var weekWorked=0,weekReq=0,weekDays=0;
 
-    // Build table data
-    var body=[];
+    html+='<h2>'+wLabel+'</h2>';
+    html+='<table><tr><th>Date</th><th>Jour</th><th>Statut</th><th>Arrivée</th><th>Départ</th><th>Pause</th><th>Travaillé</th><th>Dû</th><th>Écart</th></tr>';
+
     for(var j=0;j<wEntries.length;j++){
       var k2=wEntries[j],e=S.entries[k2],d2=pdkey(k2);
       var dn=DAYS_F[MI(d2)].substring(0,3);
       var tp=(TYPES[e.type||'normal']||TYPES.normal).label;
       var req=RQ(d2),brk=BK(d2);
       var isA=ABS.indexOf(e.type)!==-1;
+
       if(isA){
-        body.push([k2,dn,tp,'—','—','—','—',HMS(req),'—']);
+        html+='<tr><td>'+k2+'</td><td>'+dn+'</td><td>'+tp+'</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>';
         continue;
       }
       if(e.arrival&&e.departure){
         var gross=TM(e.departure)-TM(e.arrival),net=gross-brk,delta=net-req;
         weekWorked+=net;weekReq+=req;weekDays++;
+        var cls=delta>=0?'pos':'neg';
         var ds=delta>=0?'+'+HMS(delta):'-'+HMS(Math.abs(delta));
-        body.push([k2,dn,tp,e.arrival,e.departure,HMS(brk),HMS(net),HMS(req),ds]);
+        html+='<tr><td>'+k2+'</td><td>'+dn+'</td><td>'+tp+'</td><td>'+e.arrival+'</td><td>'+e.departure+'</td><td>'+HMS(brk)+'</td><td>'+HMS(net)+'</td><td>'+HMS(req)+'</td><td class="'+cls+'">'+ds+'</td></tr>';
       }else{
-        body.push([k2,dn,tp,e.arrival||'—',e.departure||'—','—','—',HMS(req),'—']);
+        html+='<tr><td>'+k2+'</td><td>'+dn+'</td><td>'+tp+'</td><td>'+(e.arrival||'—')+'</td><td>'+(e.departure||'—')+'</td><td>—</td><td>—</td><td>'+HMS(req)+'</td><td>—</td></tr>';
       }
     }
     // Total row
     var wDelta=weekWorked-weekReq;
+    var wCls=wDelta>=0?'pos':'neg';
     var wDs=wDelta>=0?'+'+HMS(wDelta):'-'+HMS(Math.abs(wDelta));
-    body.push(['','','TOTAL ('+weekDays+'j)','','','',HMS(weekWorked),HMS(weekReq),wDs]);
-
-    // Check page space
-    if(startY>240){doc.addPage();startY=20;}
-
-    // Week header
-    doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(15,23,42);
-    doc.text(wLabel,14,startY);
-    startY+=2;
-
-    doc.autoTable({
-      startY:startY,
-      head:[['Date','Jour','Statut','Arrivée','Départ','Pause','Travaillé','Dû','Écart']],
-      body:body,
-      theme:'grid',
-      styles:{font:'helvetica',fontSize:8,cellPadding:2,textColor:[30,41,59]},
-      headStyles:{fillColor:[30,41,59],textColor:[255,255,255],fontStyle:'bold',fontSize:7},
-      columnStyles:{0:{cellWidth:22},1:{cellWidth:12},2:{cellWidth:24},3:{cellWidth:16},4:{cellWidth:16},5:{cellWidth:14},6:{cellWidth:18},7:{cellWidth:14},8:{cellWidth:16}},
-      didParseCell:function(data){
-        // Style total row
-        if(data.row.index===body.length-1){
-          data.cell.styles.fontStyle='bold';
-          data.cell.styles.fillColor=[241,245,249];
-        }
-        // Color ecart column
-        if(data.column.index===8&&data.row.index<body.length-1){
-          var val=data.cell.text[0]||'';
-          if(val.indexOf('+')===0)data.cell.styles.textColor=[22,163,74];
-          else if(val.indexOf('-')===0)data.cell.styles.textColor=[220,38,38];
-        }
-        // Total ecart
-        if(data.column.index===8&&data.row.index===body.length-1){
-          var val2=data.cell.text[0]||'';
-          if(val2.indexOf('+')===0)data.cell.styles.textColor=[22,163,74];
-          else if(val2.indexOf('-')===0)data.cell.styles.textColor=[220,38,38];
-        }
-      },
-      margin:{left:14,right:14}
-    });
-    startY=doc.lastAutoTable.finalY+8;
+    html+='<tr class="total-row"><td></td><td></td><td>TOTAL ('+weekDays+'j)</td><td></td><td></td><td></td><td>'+HMS(weekWorked)+'</td><td>'+HMS(weekReq)+'</td><td class="'+wCls+'">'+wDs+'</td></tr>';
+    html+='</table>';
   }
 
-  // Footer
-  doc.setFontSize(8);doc.setTextColor(150);
-  doc.text('Pointeuse App — by WEYNII',14,doc.internal.pageSize.height-10);
+  html+='<div class="footer">Pointeuse App — by WEYNII</div>';
+  html+='<script>window.onload=function(){window.print();}<\/script>';
+  html+='</body></html>';
 
-  doc.save('releve_heures_'+dkey(new Date())+'.pdf');
-  toast('PDF téléchargé !');
+  // Open in new window/tab → triggers print dialog → Save as PDF on iOS
+  var w=window.open('','_blank');
+  if(w){
+    w.document.write(html);
+    w.document.close();
+    toast('Impression/PDF ouvert');
+  }else{
+    // Fallback for popup blocked: use blob
+    var blob=new Blob([html],{type:'text/html'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');a.href=url;a.target='_blank';a.click();
+    setTimeout(function(){URL.revokeObjectURL(url);},2000);
+    toast('PDF ouvert dans un nouvel onglet');
+  }
 }
-
 // ═══════════════════════════════════════════════
 // ── REMINDER: check for unfilled work days ──
 // ═══════════════════════════════════════════════
