@@ -274,6 +274,14 @@ button{font-family:var(--font);cursor:pointer;border:none;outline:none;-webkit-a
 .app-footer{text-align:center;padding:24px 0 12px;font-size:10px;color:var(--text3);font-weight:500;letter-spacing:0.3px}
 .app-footer span{font-weight:800;color:var(--text2);letter-spacing:0.5px}
 
+/* ── Print overlay ── */
+.print-overlay{position:fixed;inset:0;z-index:600;background:var(--bg);overflow-y:auto;padding:0}
+.print-topbar{position:sticky;top:0;z-index:601;display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:var(--dark);padding-top:calc(10px + var(--safe-top))}
+.print-topbar button{padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700}
+.print-close{background:#334155;color:#fff}
+.print-action{background:var(--blue);color:#fff}
+.print-content{padding:16px;max-width:700px;margin:0 auto}
+
 /* ── NEW: Backup section in settings ── */
 .backup-section{margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
 .backup-section h3{font-size:14px;font-weight:700;margin-bottom:10px}
@@ -478,10 +486,7 @@ function doExport(){
 // ═══════════════════════════════════════════════
 // ── PDF EXPORT (relevé d'heures pro) ──
 // ═══════════════════════════════════════════════
-function getJsPDF(){return null;}
-function loadScript(){return Promise.resolve();}
 function doExportPDF(){
-  // ── Generate a clean HTML page and use native print (Save as PDF on iOS) ──
   var sorted=Object.keys(S.entries).sort();
   if(sorted.length===0){toast('Aucune donnée à exporter');return;}
 
@@ -494,33 +499,21 @@ function doExportPDF(){
     weeks[wk].push(k);
   }
 
-  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relevé d\'heures</title>';
-  html+='<style>';
-  html+='*{margin:0;padding:0;box-sizing:border-box}';
-  html+='body{font-family:Helvetica,Arial,sans-serif;color:#1e293b;padding:20px;font-size:11px}';
-  html+='h1{font-size:18px;font-weight:800;margin-bottom:2px}';
-  html+='h2{font-size:12px;font-weight:800;margin:16px 0 4px;color:#1e293b}';
-  html+='.sub{font-size:10px;color:#64748b;margin-bottom:16px}';
-  html+='table{width:100%;border-collapse:collapse;margin-bottom:6px}';
-  html+='th{background:#1e293b;color:#fff;padding:5px 6px;text-align:left;font-size:9px;font-weight:700;text-transform:uppercase}';
-  html+='td{padding:4px 6px;border-bottom:1px solid #e2e8f0;font-size:10px}';
-  html+='tr:last-child td{border-bottom:none}';
-  html+='.total-row{background:#f1f5f9;font-weight:700}';
-  html+='.pos{color:#16a34a}.neg{color:#dc2626}';
-  html+='.footer{margin-top:20px;text-align:center;font-size:9px;color:#94a3b8}';
-  html+='@media print{body{padding:10px}@page{margin:12mm}}';
-  html+='</style></head><body>';
+  var totalWorked=0,totalReq=0;
 
-  html+='<h1>Relevé d\'heures de travail</h1>';
-  html+='<div class="sub">Exporté le '+dkey(new Date())+'</div>';
+  // Build printable HTML content
+  var c='<div style="font-family:Helvetica,Arial,sans-serif;color:#1e293b;font-size:11px">';
+  c+='<h1 style="font-size:18px;font-weight:800;margin:0 0 2px">Relevé d\'heures de travail</h1>';
+  c+='<p style="font-size:10px;color:#64748b;margin:0 0 16px">Exporté le '+dkey(new Date())+'</p>';
 
   for(var wi=0;wi<weekOrder.length;wi++){
     var wLabel=weekOrder[wi];
     var wEntries=weeks[wLabel];
     var weekWorked=0,weekReq=0,weekDays=0;
 
-    html+='<h2>'+wLabel+'</h2>';
-    html+='<table><tr><th>Date</th><th>Jour</th><th>Statut</th><th>Arrivée</th><th>Départ</th><th>Pause</th><th>Travaillé</th><th>Dû</th><th>Écart</th></tr>';
+    c+='<h2 style="font-size:12px;font-weight:800;margin:16px 0 4px">'+wLabel+'</h2>';
+    c+='<table style="width:100%;border-collapse:collapse;margin-bottom:6px">';
+    c+='<tr style="background:#1e293b;color:#fff;font-size:9px;font-weight:700;text-transform:uppercase"><th style="padding:5px 6px;text-align:left">Date</th><th style="padding:5px 6px;text-align:left">Jour</th><th style="padding:5px 6px;text-align:left">Statut</th><th style="padding:5px 6px;text-align:left">Arrivée</th><th style="padding:5px 6px;text-align:left">Départ</th><th style="padding:5px 6px;text-align:left">Pause</th><th style="padding:5px 6px;text-align:left">Travaillé</th><th style="padding:5px 6px;text-align:left">Dû</th><th style="padding:5px 6px;text-align:left">Écart</th></tr>';
 
     for(var j=0;j<wEntries.length;j++){
       var k2=wEntries[j],e=S.entries[k2],d2=pdkey(k2);
@@ -528,47 +521,69 @@ function doExportPDF(){
       var tp=(TYPES[e.type||'normal']||TYPES.normal).label;
       var req=RQ(d2),brk=BK(d2);
       var isA=ABS.indexOf(e.type)!==-1;
+      var tdS='style="padding:4px 6px;border-bottom:1px solid #e2e8f0;font-size:10px"';
 
       if(isA){
-        html+='<tr><td>'+k2+'</td><td>'+dn+'</td><td>'+tp+'</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>';
+        c+='<tr><td '+tdS+'>'+k2+'</td><td '+tdS+'>'+dn+'</td><td '+tdS+'>'+tp+'</td><td '+tdS+'>—</td><td '+tdS+'>—</td><td '+tdS+'>—</td><td '+tdS+'>—</td><td '+tdS+'>—</td><td '+tdS+'>—</td></tr>';
         continue;
       }
       if(e.arrival&&e.departure){
         var gross=TM(e.departure)-TM(e.arrival),net=gross-brk,delta=net-req;
         weekWorked+=net;weekReq+=req;weekDays++;
-        var cls=delta>=0?'pos':'neg';
+        var dColor=delta>=0?'#16a34a':'#dc2626';
         var ds=delta>=0?'+'+HMS(delta):'-'+HMS(Math.abs(delta));
-        html+='<tr><td>'+k2+'</td><td>'+dn+'</td><td>'+tp+'</td><td>'+e.arrival+'</td><td>'+e.departure+'</td><td>'+HMS(brk)+'</td><td>'+HMS(net)+'</td><td>'+HMS(req)+'</td><td class="'+cls+'">'+ds+'</td></tr>';
+        c+='<tr><td '+tdS+'>'+k2+'</td><td '+tdS+'>'+dn+'</td><td '+tdS+'>'+tp+'</td><td '+tdS+'>'+e.arrival+'</td><td '+tdS+'>'+e.departure+'</td><td '+tdS+'>'+HMS(brk)+'</td><td '+tdS+'>'+HMS(net)+'</td><td '+tdS+'>'+HMS(req)+'</td><td '+tdS+' style="padding:4px 6px;border-bottom:1px solid #e2e8f0;font-size:10px;color:'+dColor+';font-weight:700">'+ds+'</td></tr>';
       }else{
-        html+='<tr><td>'+k2+'</td><td>'+dn+'</td><td>'+tp+'</td><td>'+(e.arrival||'—')+'</td><td>'+(e.departure||'—')+'</td><td>—</td><td>—</td><td>'+HMS(req)+'</td><td>—</td></tr>';
+        c+='<tr><td '+tdS+'>'+k2+'</td><td '+tdS+'>'+dn+'</td><td '+tdS+'>'+tp+'</td><td '+tdS+'>'+(e.arrival||'—')+'</td><td '+tdS+'>'+(e.departure||'—')+'</td><td '+tdS+'>—</td><td '+tdS+'>—</td><td '+tdS+'>'+HMS(req)+'</td><td '+tdS+'>—</td></tr>';
       }
     }
-    // Total row
+    totalWorked+=weekWorked;totalReq+=weekReq;
     var wDelta=weekWorked-weekReq;
-    var wCls=wDelta>=0?'pos':'neg';
+    var wColor=wDelta>=0?'#16a34a':'#dc2626';
     var wDs=wDelta>=0?'+'+HMS(wDelta):'-'+HMS(Math.abs(wDelta));
-    html+='<tr class="total-row"><td></td><td></td><td>TOTAL ('+weekDays+'j)</td><td></td><td></td><td></td><td>'+HMS(weekWorked)+'</td><td>'+HMS(weekReq)+'</td><td class="'+wCls+'">'+wDs+'</td></tr>';
-    html+='</table>';
+    c+='<tr style="background:#f1f5f9;font-weight:700"><td style="padding:4px 6px;font-size:10px"></td><td style="padding:4px 6px;font-size:10px"></td><td style="padding:4px 6px;font-size:10px">TOTAL ('+weekDays+'j)</td><td style="padding:4px 6px;font-size:10px"></td><td style="padding:4px 6px;font-size:10px"></td><td style="padding:4px 6px;font-size:10px"></td><td style="padding:4px 6px;font-size:10px">'+HMS(weekWorked)+'</td><td style="padding:4px 6px;font-size:10px">'+HMS(weekReq)+'</td><td style="padding:4px 6px;font-size:10px;color:'+wColor+'">'+wDs+'</td></tr>';
+    c+='</table>';
   }
 
-  html+='<div class="footer">Pointeuse App — by WEYNII</div>';
-  html+='<script>window.onload=function(){window.print();}<\/script>';
-  html+='</body></html>';
+  // ── CUMUL TOTAL ──
+  var grandDelta=totalWorked-totalReq;
+  var gColor=grandDelta>=0?'#16a34a':'#dc2626';
+  var gBg=grandDelta>=0?'#f0fdf4':'#fef2f2';
+  var gDs=grandDelta>=0?'+'+HMS(grandDelta):'-'+HMS(Math.abs(grandDelta));
+  c+='<div style="margin-top:20px;padding:14px;border-radius:10px;background:'+gBg+';border:2px solid '+gColor+'33;text-align:center">';
+  c+='<div style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Cumul total</div>';
+  c+='<div style="font-size:13px;font-weight:700;color:#475569;margin-bottom:2px">Travaillé : '+HMS(totalWorked)+' — Dû : '+HMS(totalReq)+'</div>';
+  c+='<div style="font-size:22px;font-weight:800;color:'+gColor+'">'+gDs+'</div>';
+  c+='</div>';
 
-  // Open in new window/tab → triggers print dialog → Save as PDF on iOS
-  var w=window.open('','_blank');
-  if(w){
-    w.document.write(html);
-    w.document.close();
-    toast('Impression/PDF ouvert');
-  }else{
-    // Fallback for popup blocked: use blob
-    var blob=new Blob([html],{type:'text/html'});
-    var url=URL.createObjectURL(blob);
-    var a=document.createElement('a');a.href=url;a.target='_blank';a.click();
-    setTimeout(function(){URL.revokeObjectURL(url);},2000);
-    toast('PDF ouvert dans un nouvel onglet');
-  }
+  c+='<div style="margin-top:20px;text-align:center;font-size:9px;color:#94a3b8">Pointeuse App — by WEYNII</div>';
+  c+='</div>';
+
+  // ── Show in-app overlay with print button ──
+  var overlay=document.createElement('div');
+  overlay.className='print-overlay';
+  overlay.innerHTML='<div class="print-topbar"><button class="print-close" id="print-close">← Retour</button><button class="print-action" id="print-go">🖨 Imprimer / PDF</button></div><div class="print-content" id="print-area">'+c+'</div>';
+  document.body.appendChild(overlay);
+
+  document.getElementById('print-close').onclick=function(){
+    document.body.removeChild(overlay);
+  };
+  document.getElementById('print-go').onclick=function(){
+    // Create a hidden iframe for printing (keeps the app alive)
+    var iframe=document.createElement('iframe');
+    iframe.style.cssText='position:fixed;top:0;left:0;width:0;height:0;border:none;visibility:hidden';
+    document.body.appendChild(iframe);
+    var idoc=iframe.contentDocument||iframe.contentWindow.document;
+    idoc.open();
+    idoc.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relevé</title><style>@page{margin:10mm}body{font-family:Helvetica,Arial,sans-serif;padding:10px}</style></head><body>'+c+'</body></html>');
+    idoc.close();
+    setTimeout(function(){
+      iframe.contentWindow.print();
+      setTimeout(function(){document.body.removeChild(iframe);},1000);
+    },300);
+  };
+
+  toast('Aperçu du relevé');
 }
 // ═══════════════════════════════════════════════
 // ── REMINDER: check for unfilled work days ──
