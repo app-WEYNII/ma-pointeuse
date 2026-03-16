@@ -4,7 +4,7 @@
 // ═══════════════════════════════════════════════════════
 
 // Nom du cache - changer la version force un rechargement complet
-var CACHE_NAME = 'pointeuse-v1';
+var CACHE_NAME = 'pointeuse-v2';
 
 // Fichiers essentiels à mettre en cache pour le fonctionnement offline
 var URLS_TO_CACHE = [
@@ -18,7 +18,9 @@ var URLS_TO_CACHE = [
 // URLs externes (CDN) à mettre en cache au premier chargement
 var CDN_URLS = [
   'https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap',
-  'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js'
+  'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js'
 ];
 
 // ── INSTALL : mise en cache des fichiers essentiels ──
