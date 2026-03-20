@@ -1110,6 +1110,15 @@ function render(){
     h+='<input class="time-field" id="dep-m" type="number" inputmode="numeric" maxlength="2" placeholder="MM" value="'+depM+'" oninput="onMinInput(\'dep\',\'departure\')" onblur="onFieldBlur(\'dep\',\'m\',\'departure\')" onfocus="onFieldFocus(event)">';
     h+='</div></div></div>';
 
+    // ── Estimated departure time ──
+    if(cur.arrival&&!cur.departure){
+      var estDep=TM(cur.arrival)+reqT+brkT;
+      var estH=Math.floor(estDep/60),estMin=estDep%60;
+      h+='<div style="text-align:center;margin:-8px 0 12px;font-size:12px;font-weight:600;color:var(--blue)">';
+      h+='🕐 Départ estimé à <b>'+P(estH)+':'+P(estMin)+'</b> <span style="font-weight:400;color:var(--text3)">('+HMS(reqT)+' travail + '+HMS(brkT)+' pause)</span>';
+      h+='</div>';
+    }
+
     if(netM!==null){
       h+='<div class="results">';
       h+='<div class="res-row"><span class="res-label">Présence brute</span><span class="res-value">'+HMS(grossM)+'</span></div>';
