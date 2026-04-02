@@ -4,7 +4,7 @@
 // ═══════════════════════════════════════════════════════
 
 // Nom du cache - changer la version force un rechargement complet
-var CACHE_NAME = 'pointeuse-v3';
+var CACHE_NAME = 'pointeuse-v4';
 
 // Fichiers essentiels à mettre en cache pour le fonctionnement offline
 var URLS_TO_CACHE = [
