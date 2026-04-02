@@ -351,9 +351,10 @@ var TYPES={
   cp:{label:'Congés payés',icon:'🌴',color:'#f59e0b',bg:'#fffbeb',dbg:'#78350f'},
   rtt:{label:'RTT',icon:'☀️',color:'#06b6d4',bg:'#ecfeff',dbg:'#164e63'},
   maladie:{label:'Arrêt maladie',icon:'🏥',color:'#ef4444',bg:'#fef2f2',dbg:'#7f1d1d'},
-  repos:{label:'Repos',icon:'💤',color:'#64748b',bg:'#f1f5f9',dbg:'#334155'}
+  repos:{label:'Repos',icon:'💤',color:'#64748b',bg:'#f1f5f9',dbg:'#334155'},
+  ferie:{label:'Jour férié',icon:'📅',color:'#10b981',bg:'#ecfdf5',dbg:'#064e3b'}
 };
-var ABS=['cp','rtt','maladie','repos'];
+var ABS=['cp','rtt','maladie','repos','ferie'];
 var WRK=['normal','teletravail','deplacement'];
 
 var S={entries:{},config:{},breaks:{},selDate:new Date(),calM:new Date().getMonth(),calY:new Date().getFullYear(),showSettings:false,showTypeMenu:false,showPicker:false,chartMode:'delta',chartOffset:0,multiSel:false,multiDays:{},darkMode:false,reminderDismissed:false};
@@ -394,6 +395,9 @@ function SG(o,k,d){var v=o[k];return v!=null?v:d;}
 function RQ(d){
   var k=dkey(d);var e=S.entries[k];
   if(e&&e.customReq!=null)return e.customReq;
+  // Jour férié sans type explicite → 0 requis
+  if(!e||!e.type){if(isFerie(k))return 0;}
+  if(e&&e.type==='ferie')return 0;
   return SG(S.config,MI(d),0);
 }
 function BK(d){
@@ -405,6 +409,53 @@ function DIM(y,m){return new Date(y,m+1,0).getDate();}
 function FDM(y,m){var d=new Date(y,m,1).getDay();return d===0?6:d-1;}
 function WN(d){var dt=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));var dn=dt.getUTCDay()||7;dt.setUTCDate(dt.getUTCDate()+4-dn);var ys=new Date(Date.UTC(dt.getUTCFullYear(),0,1));return Math.ceil((((dt-ys)/86400000)+1)/7);}
 function WD(d){var df=(d.getDay()===0?-6:1)-d.getDay();var m=new Date(d);m.setDate(d.getDate()+df);var r=[];for(var i=0;i<7;i++){var dd=new Date(m);dd.setDate(m.getDate()+i);r.push(dd);}return r;}
+
+// ═══════════════════════════════════════════════
+// ── Jours fériés français ──
+// ═══════════════════════════════════════════════
+function easterDate(year){
+  // Algorithme de Meeus/Jones/Butcher
+  var a=year%19,b=Math.floor(year/100),c=year%100;
+  var d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25);
+  var g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30;
+  var i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7;
+  var m=Math.floor((a+11*h+22*l)/451);
+  var month=Math.floor((h+l-7*m+114)/31);
+  var day=((h+l-7*m+114)%31)+1;
+  return new Date(year,month-1,day);
+}
+function getJoursFeries(year){
+  var easter=easterDate(year);
+  function addDays(d,n){var r=new Date(d);r.setDate(d.getDate()+n);return r;}
+  var lundiPaques=addDays(easter,1);
+  var ascension=addDays(easter,39);
+  var lundiPentecote=addDays(easter,50);
+  var feries={};
+  var list=[
+    {d:new Date(year,0,1),n:'Jour de l\'An'},
+    {d:lundiPaques,n:'Lundi de Pâques'},
+    {d:new Date(year,4,1),n:'Fête du Travail'},
+    {d:new Date(year,4,8),n:'Victoire 1945'},
+    {d:ascension,n:'Ascension'},
+    {d:lundiPentecote,n:'Lundi de Pentecôte'},
+    {d:new Date(year,6,14),n:'Fête nationale'},
+    {d:new Date(year,7,15),n:'Assomption'},
+    {d:new Date(year,10,1),n:'Toussaint'},
+    {d:new Date(year,10,11),n:'Armistice 1918'},
+    {d:new Date(year,11,25),n:'Noël'}
+  ];
+  for(var i=0;i<list.length;i++){
+    feries[dkey(list[i].d)]=list[i].n;
+  }
+  return feries;
+}
+// Cache holidays per year
+var feriesCache={};
+function isFerie(k){
+  var y=parseInt(k.substring(0,4),10);
+  if(!feriesCache[y])feriesCache[y]=getJoursFeries(y);
+  return feriesCache[y][k]||null;
+}
 
 function gNet(k){var e=S.entries[k];if(!e||!e.arrival||!e.departure||ABS.indexOf(e.type)!==-1)return null;return TM(e.departure)-TM(e.arrival)-BK(pdkey(k));}
 function gGross(k){var e=S.entries[k];if(!e||!e.arrival||!e.departure||ABS.indexOf(e.type)!==-1)return null;return TM(e.departure)-TM(e.arrival);}
@@ -600,6 +651,8 @@ function getUnfilledDays(){
     // Skip days with 0 required hours in config
     if(SG(S.config,MI(d),0)===0)continue;
     var k=dkey(d);
+    // Skip jours fériés
+    if(isFerie(k))continue;
     var e=S.entries[k];
     // Skip if already filled with an absence type or has arrival+departure
     if(e){
@@ -921,7 +974,10 @@ function onFieldFocus(e){e.target.select();}
 // ── Render ──
 function render(){
   var app=document.getElementById('app');
-  var sk=dkey(S.selDate),cur=S.entries[sk]||{},curType=cur.type||'normal';
+  var sk=dkey(S.selDate),cur=S.entries[sk]||{};
+  // Auto-detect jour férié if no type set
+  var ferieName=isFerie(sk);
+  var curType=cur.type||(ferieName?'ferie':'normal');
   var isAbs=ABS.indexOf(curType)!==-1,isWork=WRK.indexOf(curType)!==-1;
   var today=dkey(new Date()),reqT=RQ(S.selDate),brkT=BK(S.selDate);
   var netM=gNet(sk),grossM=gGross(sk),dayD=gDelta(sk);
@@ -1003,16 +1059,21 @@ function render(){
     }
     var ddk=S.calY+'-'+P(S.calM+1)+'-'+P(d),isSel=ddk===sk,isToday=ddk===today;
     var isMultiSel=S.multiDays[ddk]===true;
-    var e=S.entries[ddk],tp=(e&&e.type)||'normal',ti=TYPES[tp];
+    var e=S.entries[ddk];
+    var cellFerie=isFerie(ddk);
+    var tp=(e&&e.type)||(cellFerie?'ferie':'normal');
+    var ti=TYPES[tp];
     var cls='cal-cell';
     if(isMultiSel)cls+=' multi-selected';
     if(isSel)cls+=' selected';
     else if(isToday)cls+=' today';
     var typeBg=S.darkMode?ti.dbg:ti.bg;
-    var bg=e&&!isSel&&!isMultiSel?'background:'+typeBg+';':'';
+    var hasBg=(e||cellFerie)&&!isSel&&!isMultiSel;
+    var bg=hasBg?'background:'+typeBg+';':'';
     var dot='';
     if(e){if(tp!=='normal')dot='<div class="cal-dot type-dot" style="background:'+ti.color+'"></div>';
     else{var dd=gDelta(ddk);if(dd!==null)dot='<div class="cal-dot" style="background:'+(dd>=0?'var(--green)':'var(--red)')+'"></div>';else if(e.arrival||e.departure)dot='<div class="cal-dot" style="background:#f59e0b"></div>';}}
+    else if(cellFerie)dot='<div class="cal-dot type-dot" style="background:'+ti.color+'"></div>';
     var clickFn=S.multiSel?'toggleMultiDay(\''+ddk+'\')':'selDay('+d+')';
     h+='<button class="'+cls+'" style="'+bg+'" onclick="'+clickFn+'"><span>'+d+'</span>'+dot+'</button>';
     colPos++;
@@ -1055,6 +1116,7 @@ function render(){
   h+='<div class="day-panel">';
   h+='<div class="day-title">'+DAYS_F[MI(S.selDate)]+' '+S.selDate.getDate()+' '+MONTHS[S.selDate.getMonth()]+' '+S.selDate.getFullYear();
   if(sk===today)h+='<span class="today-badge">Aujourd\'hui</span>';
+  if(ferieName)h+='<span style="display:inline-block;padding:2px 8px;background:#ecfdf5;color:#10b981;border-radius:6px;font-size:10px;font-weight:800;margin-left:6px">📅 '+ferieName+'</span>';
   h+='</div>';
 
   // Type
@@ -1132,7 +1194,8 @@ function render(){
   }
 
   if(isAbs){
-    h+='<div class="absence-card" style="border-color:'+ti2.color+'33;background:'+ti2Bg+'"><span class="a-icon">'+ti2.icon+'</span><span class="a-label" style="color:'+ti2.color+'">'+ti2.label+'</span><span class="a-hint">Journée non comptabilisée</span></div>';
+    var absHint=ferieName?ferieName:'Journée non comptabilisée';
+    h+='<div class="absence-card" style="border-color:'+ti2.color+'33;background:'+ti2Bg+'"><span class="a-icon">'+ti2.icon+'</span><span class="a-label" style="color:'+ti2.color+'">'+ti2.label+'</span><span class="a-hint">'+absHint+'</span></div>';
   }
 
   if(cur.arrival||cur.departure||cur.type){
@@ -1145,11 +1208,12 @@ function render(){
   for(var wi=0;wi<wd.length;wi++){
     var w2=wd[wi],wdk=dkey(w2),we=S.entries[wdk]||{},wdelta=gDelta(wdk),wnet=gNet(wdk);
     var isWE=w2.getDay()===0||w2.getDay()===6,wisSel=wdk===sk;
-    var wtp=we.type||'normal',wti=TYPES[wtp],wisA=ABS.indexOf(wtp)!==-1;
+    var wFerie=isFerie(wdk);
+    var wtp=we.type||(wFerie?'ferie':'normal'),wti=TYPES[wtp],wisA=ABS.indexOf(wtp)!==-1;
     h+='<div class="week-row'+(wisSel?' sel':'')+(isWE?' we':'')+'" onclick="selDate(\''+wdk+'\')">';
     h+='<span class="wc-day" style="font-weight:'+(wisSel?700:500)+'">'+DAYS_S[MI(w2)]+' '+w2.getDate()+'</span>';
     var wtiBg=S.darkMode?wti.dbg:wti.bg;
-    h+='<span class="wc" style="font-size:13px"><span style="display:inline-block;padding:2px 5px;border-radius:5px;background:'+(((we.type||we.arrival||we.departure)||!isWE)?wtiBg:'transparent')+'">'+((we.type||we.arrival||we.departure)?wti.icon:(isWE?'—':'🏢'))+'</span></span>';
+    h+='<span class="wc" style="font-size:13px"><span style="display:inline-block;padding:2px 5px;border-radius:5px;background:'+(((we.type||we.arrival||we.departure||wFerie)||!isWE)?wtiBg:'transparent')+'">'+((we.type||we.arrival||we.departure||wFerie)?wti.icon:(isWE?'—':'🏢'))+'</span></span>';
     h+='<span class="wc">'+(wisA?'—':(we.arrival||'—'))+'</span>';
     h+='<span class="wc">'+(wisA?'—':(we.departure||'—'))+'</span>';
     h+='<span class="wc">'+(wnet!==null?HMS(wnet):'—')+'</span>';
