@@ -982,11 +982,12 @@ function render(){
   var today=dkey(new Date()),reqT=RQ(S.selDate),brkT=BK(S.selDate);
   var netM=gNet(sk),grossM=gGross(sk),dayD=gDelta(sk);
   var wd=WD(S.selDate),wKeys=wd.map(dkey),wS=rStats(wKeys);
-  var mk=S.selDate.getFullYear()+'-'+P(S.selDate.getMonth()+1);
+  var mk=S.calY+'-'+P(S.calM+1);
   var mS=rStats(Object.keys(S.entries).filter(function(k){return k.indexOf(mk)===0;}));
-  var yStr=String(S.selDate.getFullYear());
+  var yStr=String(S.calY);
   var yS=rStats(Object.keys(S.entries).filter(function(k){return k.indexOf(yStr)===0;}));
-  var cumKeys=Object.keys(S.entries).filter(function(k){return k.indexOf(yStr)===0&&k<=sk;}).sort();
+  var cumYStr=String(S.selDate.getFullYear());
+  var cumKeys=Object.keys(S.entries).filter(function(k){return k.indexOf(cumYStr)===0&&k<=sk;}).sort();
   var cumD=0;for(var ci=0;ci<cumKeys.length;ci++){var cd=gDelta(cumKeys[ci]);if(cd!==null)cumD+=cd;}
 
   var arrH='',arrM='',depH='',depM='';
@@ -1019,7 +1020,7 @@ function render(){
   }
 
   // Cards
-  var cards=[{l:'Sem. '+WN(S.selDate),s:wS},{l:MONTHS[S.selDate.getMonth()],s:mS},{l:yStr,s:yS}];
+  var cards=[{l:'Sem. '+WN(S.selDate),s:wS},{l:MONTHS[S.calM],s:mS},{l:yStr,s:yS}];
   h+='<div class="cards">';
   for(var i=0;i<cards.length;i++){var c=cards[i],pos=c.s.delta>=0;
     h+='<div class="card '+(pos?'pos':'neg')+'"><span class="card-label">'+c.l+'</span><span class="card-delta">'+HM(c.s.delta)+'</span><span class="card-worked">'+HMS(c.s.worked)+'</span><span class="card-days">'+c.s.days+' jour'+(c.s.days>1?'s':'')+'</span></div>';
