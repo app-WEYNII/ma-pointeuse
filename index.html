@@ -331,6 +331,47 @@ button{font-family:var(--font);cursor:pointer;border:none;outline:none;-webkit-a
 .dialog-actions button{flex:1;padding:11px;border-radius:10px;font-size:14px;font-weight:700}
 .dialog-cancel{background:#f1f5f9;color:var(--text3)}
 .dialog-ok{background:var(--dark);color:#fff}
+
+/* ── Fractionné + Télétravail (ajouts) ── */
+.split-badge{display:inline-flex;align-items:center;gap:4px;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:700;background:#fef3c7;color:#b45309;border:2px solid #fcd34d}
+.split-toggle{padding:8px 12px;border-radius:10px;font-size:12px;font-weight:700;background:var(--surface);border:1.5px solid var(--border);color:var(--text2)}
+.split-toggle.on{background:#fffbeb;border-color:#fcd34d;color:#b45309}
+.split-half{background:var(--input-bg);border:1.5px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px}
+.split-half-head{font-size:13px;font-weight:800;color:var(--text);margin-bottom:8px}
+.split-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+.split-chip{padding:5px 9px;border-radius:8px;font-size:11px;font-weight:600;background:var(--surface);border:1.5px solid var(--border);color:var(--text2)}
+.split-chip.on{font-weight:800}
+.split-times{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.split-time-pill{padding:9px 12px;border-radius:10px;font-size:14px;font-weight:700;font-family:var(--mono);border:1.5px solid var(--border);background:var(--surface);color:var(--text)}
+.split-time-pill.arr{border-color:#bbf7d0}
+.split-time-pill.dep{border-color:#fecaca}
+.split-arrow{font-size:16px;color:var(--text3)}
+.split-net{font-size:13px;font-weight:700;color:var(--blue);margin-left:auto}
+.split-credited{font-size:12px;font-weight:600;color:var(--green);padding:6px 0}
+[data-theme="dark"] .split-badge{background:#78350f;color:#fbbf24;border-color:#92400e}
+[data-theme="dark"] .split-toggle.on{background:#78350f;color:#fbbf24;border-color:#92400e}
+[data-theme="dark"] .split-chip{background:#1e293b;border-color:#334155;color:#94a3b8}
+[data-theme="dark"] .split-time-pill{background:#1e293b;color:var(--text);border-color:#334155}
+.tt-section{margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
+.tt-section h3{font-size:14px;font-weight:700;margin-bottom:4px}
+.tt-days{display:flex;gap:5px;margin-bottom:10px}
+.tt-day-chip{flex:1;padding:9px 0;border-radius:9px;font-size:11px;font-weight:700;background:var(--input-bg);border:1.5px solid var(--border);color:var(--text3)}
+.tt-day-chip.on{background:#f5f3ff;border-color:#8b5cf6;color:#8b5cf6}
+[data-theme="dark"] .tt-day-chip{background:#1e293b;border-color:#334155}
+[data-theme="dark"] .tt-day-chip.on{background:#3b1f7e;color:#c4b5fd;border-color:#8b5cf6}
+.tt-times{display:flex;gap:8px;margin-bottom:10px}
+.tt-time-pill{flex:1;padding:10px;border-radius:10px;font-size:12px;font-weight:600;background:var(--input-bg);border:1.5px solid var(--border);color:var(--text2)}
+[data-theme="dark"] .tt-time-pill{background:#1e293b;border-color:#334155}
+.tt-auto{width:100%;padding:10px;border-radius:10px;font-size:12px;font-weight:700;background:var(--input-bg);border:1.5px solid var(--border);color:var(--text2);margin-bottom:8px}
+.tt-auto.on{background:#f0fdf4;border-color:#86efac;color:var(--green)}
+[data-theme="dark"] .tt-auto{background:#1e293b;border-color:#334155}
+[data-theme="dark"] .tt-auto.on{background:#14532d;color:#4ade80;border-color:#166534}
+.tt-fill-btn{width:100%;padding:11px;border-radius:10px;font-size:13px;font-weight:700;background:#f5f3ff;color:#8b5cf6;border:1.5px solid #ddd6fe}
+[data-theme="dark"] .tt-fill-btn{background:#3b1f7e;color:#c4b5fd;border-color:#6d28d9}
+.counter-year{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:12px}
+.counter-year-btn{width:34px;height:34px;border-radius:9px;background:var(--input-bg);border:1.5px solid var(--border);font-size:13px;font-weight:700;color:var(--text2);display:flex;align-items:center;justify-content:center}
+.counter-year-lbl{font-size:18px;font-weight:800;color:var(--text);min-width:64px;text-align:center}
+[data-theme="dark"] .counter-year-btn{background:#1e293b;border-color:#334155}
 </style>
 </head>
 <body>
@@ -343,6 +384,9 @@ var DAYS_S=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
 var DAYS_F=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
 var DEF_REQ={0:450,1:450,2:450,3:432,4:450,5:0,6:0};
 var DEF_BRK={0:60,1:60,2:60,3:60,4:60,5:0,6:0};
+// ── Template télétravail récurrent ──
+var DEF_TT={auto:true,days:{},arrival:'09:00',departure:'17:30'};
+var HALVES=[{k:'am',label:'Matin',icon:'🌅'},{k:'pm',label:'Après-midi',icon:'🌆'}];
 
 var TYPES={
   normal:{label:'Présentiel',icon:'🏢',color:'#3b82f6',bg:'#eff6ff',dbg:'#1e3a5f'},
@@ -357,19 +401,25 @@ var TYPES={
 var ABS=['cp','rtt','maladie','repos','ferie'];
 var WRK=['normal','teletravail','deplacement'];
 
-var S={entries:{},config:{},breaks:{},selDate:new Date(),calM:new Date().getMonth(),calY:new Date().getFullYear(),showSettings:false,showTypeMenu:false,showPicker:false,chartMode:'delta',chartOffset:0,multiSel:false,multiDays:{},darkMode:false,reminderDismissed:false};
+var S={entries:{},config:{},breaks:{},tt:Object.assign({},DEF_TT),selDate:new Date(),calM:new Date().getMonth(),calY:new Date().getFullYear(),counterYear:new Date().getFullYear(),showSettings:false,showTypeMenu:false,showPicker:false,chartMode:'delta',chartOffset:0,multiSel:false,multiDays:{},darkMode:false,reminderDismissed:false};
 
 function load(){
   try{var d=JSON.parse(localStorage.getItem('pointeuse-data')||'{}');
     S.entries=d.entries||{};
     S.config=Object.keys(d.config||{}).length?d.config:Object.assign({},DEF_REQ);
     S.breaks=Object.keys(d.breaks||{}).length?d.breaks:Object.assign({},DEF_BRK);
-  }catch(e){S.entries={};S.config=Object.assign({},DEF_REQ);S.breaks=Object.assign({},DEF_BRK);}
+    S.tt=Object.assign({},DEF_TT,d.tt||{});
+    if(!S.tt.days)S.tt.days={};
+  }catch(e){S.entries={};S.config=Object.assign({},DEF_REQ);S.breaks=Object.assign({},DEF_BRK);S.tt=Object.assign({},DEF_TT);}
+  // ── Migration : un jour férié est fixe → on retire toute entrée posée dessus (ex: CP par erreur) ──
+  try{
+    Object.keys(S.entries).forEach(function(k){if(isFerie(k))delete S.entries[k];});
+  }catch(e){}
   // Load theme preference
   S.darkMode=localStorage.getItem('pointeuse-dark')==='true';
   applyTheme();
 }
-function save(){try{localStorage.setItem('pointeuse-data',JSON.stringify({entries:S.entries,config:S.config,breaks:S.breaks}));}catch(e){}}
+function save(){try{localStorage.setItem('pointeuse-data',JSON.stringify({entries:S.entries,config:S.config,breaks:S.breaks,tt:S.tt}));}catch(e){}}
 function applyTheme(){
   document.documentElement.setAttribute('data-theme',S.darkMode?'dark':'');
   var meta=document.querySelector('meta[name="theme-color"]');
@@ -394,9 +444,9 @@ function SG(o,k,d){var v=o[k];return v!=null?v:d;}
 // ── MODIFIED: RQ/BK now check per-entry customReq/customBrk first ──
 function RQ(d){
   var k=dkey(d);var e=S.entries[k];
+  // Jour férié → toujours 0 requis (prioritaire, non modifiable)
+  if(isFerie(k))return 0;
   if(e&&e.customReq!=null)return e.customReq;
-  // Jour férié sans type explicite → 0 requis
-  if(!e||!e.type){if(isFerie(k))return 0;}
   if(e&&e.type==='ferie')return 0;
   return SG(S.config,MI(d),0);
 }
@@ -457,14 +507,84 @@ function isFerie(k){
   return feriesCache[y][k]||null;
 }
 
-function gNet(k){var e=S.entries[k];if(!e||!e.arrival||!e.departure||ABS.indexOf(e.type)!==-1)return null;return TM(e.departure)-TM(e.arrival)-BK(pdkey(k));}
-function gGross(k){var e=S.entries[k];if(!e||!e.arrival||!e.departure||ABS.indexOf(e.type)!==-1)return null;return TM(e.departure)-TM(e.arrival);}
-function gDelta(k){var n=gNet(k);return n===null?null:n-RQ(pdkey(k));}
+// ═══════════════════════════════════════════════
+// ── Pré-remplissage TÉLÉTRAVAIL récurrent ──
+// ═══════════════════════════════════════════════
+// Un jour est éligible au pré-remplissage TT s'il est un jour TT récurrent,
+// qu'il n'a aucune entrée, et que ce n'est pas un jour férié.
+function isTTDay(d){return S.tt.days[MI(d)]===true;}
+function ttEligible(k,d){
+  if(!isTTDay(d))return false;
+  if(isFerie(k))return false;
+  return !S.entries[k]; // ne jamais écraser une entrée existante
+}
+function makeTTEntry(){return{type:'teletravail',arrival:S.tt.arrival,departure:S.tt.departure};}
+function ferieLocked(){if(isFerie(dkey(S.selDate))){toast('🔒 Jour férié — non modifiable');return true;}return false;}
+function isWeekendK(k){var w=pdkey(k).getDay();return w===0||w===6;}
+function counterYearPrev(){S.counterYear--;renderSafe();}
+function counterYearNext(){S.counterYear++;renderSafe();}
+// Nombre de samedis dans l'année = nombre de week-ends
+function countWeekendsInYear(y){var n=0;for(var m=0;m<12;m++){var dim=DIM(y,m);for(var d=1;d<=dim;d++){if(new Date(y,m,d).getDay()===6)n++;}}return n;}
+// Fériés d'une année séparés semaine / week-end
+function feriesSplit(y){var f=getJoursFeries(y),sem=0,we=0;Object.keys(f).forEach(function(k){var w=pdkey(k).getDay();if(w===0||w===6)we++;else sem++;});return{sem:sem,we:we};}
+// Remplit tous les jours TT récurrents et vides du mois affiché (passé + futur)
+function prefillTeletravailMonth(){
+  var dim=DIM(S.calY,S.calM),n=0;
+  for(var day=1;day<=dim;day++){
+    var d=new Date(S.calY,S.calM,day),k=dkey(d);
+    if(ttEligible(k,d)){S.entries[k]=makeTTEntry();n++;}
+  }
+  if(n>0){save();renderSafe();}
+  toast(n>0?n+' jour'+(n>1?'s':'')+' de télétravail pré-rempli'+(n>1?'s':''):'Aucun jour à pré-remplir');
+}
+// Auto : remplit les jours TT à venir (aujourd'hui inclus) du mois affiché, sans toucher au passé
+function autoPrefillTT(){
+  if(!S.tt.auto)return;
+  if(!Object.keys(S.tt.days).length)return;
+  var today=new Date();today.setHours(0,0,0,0);
+  var dim=DIM(S.calY,S.calM),changed=false;
+  for(var day=1;day<=dim;day++){
+    var d=new Date(S.calY,S.calM,day);d.setHours(0,0,0,0);
+    if(d<today)continue; // jamais de fabrication d'historique
+    var k=dkey(d);
+    if(ttEligible(k,d)){S.entries[k]=makeTTEntry();changed=true;}
+  }
+  if(changed)save();
+}
+
+function isWork(t){return WRK.indexOf(t)!==-1;}
+// ── Demi-journée : net travaillé d'une moitié (pas de pause sur une demi-journée) ──
+function partNet(p){if(!p||!isWork(p.type)||!p.arrival||!p.departure)return null;return TM(p.departure)-TM(p.arrival);}
+// ── Requis effectif : sur un jour fractionné, chaque moitié travaillée = requis/2 ; les moitiés en absence sont créditées ──
+function reqEff(k){
+  var d=pdkey(k),e=S.entries[k],base=RQ(d);
+  if(e&&e.split){
+    var wh=0;if(e.am&&isWork(e.am.type))wh++;if(e.pm&&isWork(e.pm.type))wh++;
+    return Math.round(base*wh/2);
+  }
+  return base;
+}
+function gNet(k){
+  var e=S.entries[k];if(!e)return null;
+  if(e.split){
+    var n=0,any=false;
+    [e.am,e.pm].forEach(function(p){var pn=partNet(p);if(pn!=null){n+=pn;any=true;}});
+    return any?n:null;
+  }
+  if(!e.arrival||!e.departure||ABS.indexOf(e.type)!==-1)return null;return TM(e.departure)-TM(e.arrival)-BK(pdkey(k));
+}
+function gGross(k){
+  var e=S.entries[k];if(!e)return null;
+  if(e.split)return gNet(k); // pas de pause déduite sur une demi-journée
+  if(!e.arrival||!e.departure||ABS.indexOf(e.type)!==-1)return null;return TM(e.departure)-TM(e.arrival);
+}
+function gDelta(k){var n=gNet(k);return n===null?null:n-reqEff(k);}
 
 function rStats(keys){var dl=0,w=0,d=0;for(var i=0;i<keys.length;i++){var ww=gNet(keys[i]),dd=gDelta(keys[i]);if(ww!==null){w+=ww;d++;}if(dd!==null)dl+=dd;}return{delta:dl,worked:w,days:d};}
 
 function genCSV(){
-  var sorted=Object.keys(S.entries).sort();
+  var todayK=dkey(new Date());
+  var sorted=Object.keys(S.entries).filter(function(k){return k<=todayK&&!isWeekendK(k);}).sort();
   if(sorted.length===0)return '';
   var csv='\uFEFF';
   
@@ -505,6 +625,19 @@ function genCSV(){
         continue;
       }
 
+      if(e.split){
+        var sNet=gNet(k2),sReq=reqEff(k2);
+        var sArr=(e.am&&e.am.arrival)||(e.pm&&e.pm.arrival)||'—';
+        var sDep=(e.pm&&e.pm.departure)||(e.am&&e.am.departure)||'—';
+        var amL=(TYPES[(e.am&&e.am.type)||'normal']||TYPES.normal).label;
+        var pmL=(TYPES[(e.pm&&e.pm.type)||'normal']||TYPES.normal).label;
+        var sDelta=(sNet!==null)?sNet-sReq:null;
+        if(sNet!==null){weekWorked+=sNet;weekReq+=sReq;weekDays++;}
+        var sDStr=sDelta===null?'—':(sDelta>=0?'+'+HMS(sDelta):'-'+HMS(Math.abs(sDelta)));
+        csv+=k2+';'+dn+';"Fractionné (Matin: '+amL+' / Après-midi: '+pmL+')";'+sArr+';'+sDep+';—;'+(sNet!==null?HMS(sNet):'—')+';'+HMS(sReq)+';'+sDStr+'\n';
+        continue;
+      }
+
       if(e.arrival&&e.departure){
         var gross=TM(e.departure)-TM(e.arrival);
         var net=gross-brk;
@@ -538,7 +671,8 @@ function doExport(){
 // ── PDF EXPORT (relevé d'heures pro) ──
 // ═══════════════════════════════════════════════
 function doExportPDF(){
-  var sorted=Object.keys(S.entries).sort();
+  var todayK=dkey(new Date());
+  var sorted=Object.keys(S.entries).filter(function(k){return k<=todayK&&!isWeekendK(k);}).sort();
   if(sorted.length===0){toast('Aucune donnée à exporter');return;}
 
   // Group by week
@@ -576,6 +710,18 @@ function doExportPDF(){
 
       if(isA){
         c+='<tr><td '+tdS+'>'+k2+'</td><td '+tdS+'>'+dn+'</td><td '+tdS+'>'+tp+'</td><td '+tdS+'>—</td><td '+tdS+'>—</td><td '+tdS+'>—</td><td '+tdS+'>—</td><td '+tdS+'>—</td><td '+tdS+'>—</td></tr>';
+        continue;
+      }
+      if(e.split){
+        var sNet=gNet(k2),sReq=reqEff(k2),sDelta=(sNet!==null)?sNet-sReq:null;
+        var sArr=(e.am&&e.am.arrival)||(e.pm&&e.pm.arrival)||'—';
+        var sDep=(e.pm&&e.pm.departure)||(e.am&&e.am.departure)||'—';
+        var amL=(TYPES[(e.am&&e.am.type)||'normal']||TYPES.normal).label;
+        var pmL=(TYPES[(e.pm&&e.pm.type)||'normal']||TYPES.normal).label;
+        if(sNet!==null){weekWorked+=sNet;weekReq+=sReq;weekDays++;}
+        var sCol=(sDelta||0)>=0?'#16a34a':'#dc2626';
+        var sDs=sDelta===null?'—':(sDelta>=0?'+'+HMS(sDelta):'-'+HMS(Math.abs(sDelta)));
+        c+='<tr><td '+tdS+'>'+k2+'</td><td '+tdS+'>'+dn+'</td><td '+tdS+'>✂️ '+amL+' / '+pmL+'</td><td '+tdS+'>'+sArr+'</td><td '+tdS+'>'+sDep+'</td><td '+tdS+'>—</td><td '+tdS+'>'+(sNet!==null?HMS(sNet):'—')+'</td><td '+tdS+'>'+HMS(sReq)+'</td><td '+tdS+' style="padding:4px 6px;border-bottom:1px solid #e2e8f0;font-size:10px;color:'+sCol+';font-weight:700">'+sDs+'</td></tr>';
         continue;
       }
       if(e.arrival&&e.departure){
@@ -656,6 +802,7 @@ function getUnfilledDays(){
     var e=S.entries[k];
     // Skip if already filled with an absence type or has arrival+departure
     if(e){
+      if(e.split)continue;                    // Jour fractionné → considéré rempli
       if(ABS.indexOf(e.type)!==-1)continue;  // CP, RTT, maladie, repos → skip
       if(e.type==='deplacement')continue;     // Déplacement → skip
       if(e.arrival&&e.departure)continue;     // Fully filled → skip
@@ -731,6 +878,7 @@ function handleBackupFile(evt){
 // ── NEW FEATURE 2: POINTER MAINTENANT ──
 // ═══════════════════════════════════════════
 function punchNow(field){
+  if(ferieLocked())return;
   var now=new Date();
   var timeStr=P(now.getHours())+':'+P(now.getMinutes());
   var k=dkey(S.selDate);
@@ -973,12 +1121,17 @@ function onFieldFocus(e){e.target.select();}
 
 // ── Render ──
 function render(){
+  autoPrefillTT();
   var app=document.getElementById('app');
   var sk=dkey(S.selDate),cur=S.entries[sk]||{};
   // Auto-detect jour férié if no type set
   var ferieName=isFerie(sk);
-  var curType=cur.type||(ferieName?'ferie':'normal');
-  var isAbs=ABS.indexOf(curType)!==-1,isWork=WRK.indexOf(curType)!==-1;
+  var selWE=(S.selDate.getDay()===0||S.selDate.getDay()===6);
+  var selWeekendRepos=selWE&&!cur.type&&!cur.arrival&&!cur.departure&&!cur.split&&!ferieName;
+  var curType=cur.type||(ferieName?'ferie':(selWeekendRepos?'repos':'normal'));
+  var isFerieDay=!!ferieName;
+  var isSplit=!isFerieDay&&cur.split===true;
+  var isAbs=!isSplit&&!isFerieDay&&ABS.indexOf(curType)!==-1,isWorkDay=!isSplit&&!isFerieDay&&WRK.indexOf(curType)!==-1;
   var today=dkey(new Date()),reqT=RQ(S.selDate),brkT=BK(S.selDate);
   var netM=gNet(sk),grossM=gGross(sk),dayD=gDelta(sk);
   var wd=WD(S.selDate),wKeys=wd.map(dkey),wS=rStats(wKeys);
@@ -1062,17 +1215,22 @@ function render(){
     var isMultiSel=S.multiDays[ddk]===true;
     var e=S.entries[ddk];
     var cellFerie=isFerie(ddk);
-    var tp=(e&&e.type)||(cellFerie?'ferie':'normal');
+    var eSplit=e&&e.split===true;
+    var cellDow=new Date(S.calY,S.calM,d).getDay(),cellWE=(cellDow===0||cellDow===6);
+    var weekendRepos=cellWE&&!e&&!cellFerie; // week-end = repos d'office
+    var tp=(e&&e.type)||(cellFerie?'ferie':(weekendRepos?'repos':'normal'));
     var ti=TYPES[tp];
     var cls='cal-cell';
     if(isMultiSel)cls+=' multi-selected';
     if(isSel)cls+=' selected';
     else if(isToday)cls+=' today';
     var typeBg=S.darkMode?ti.dbg:ti.bg;
-    var hasBg=(e||cellFerie)&&!isSel&&!isMultiSel;
-    var bg=hasBg?'background:'+typeBg+';':'';
+    var hasBg=(e||cellFerie||weekendRepos)&&!isSel&&!isMultiSel;
+    var bg=hasBg?'background:'+(eSplit?(S.darkMode?'#78350f':'#fef3c7'):typeBg)+';':'';
     var dot='';
-    if(e){if(tp!=='normal')dot='<div class="cal-dot type-dot" style="background:'+ti.color+'"></div>';
+    if(weekendRepos){dot='<div class="cal-dot type-dot" style="background:'+TYPES.repos.color+'"></div>';}
+    else if(eSplit){var sd=gDelta(ddk);dot='<div class="cal-dot" style="background:'+(sd===null?'#f59e0b':(sd>=0?'var(--green)':'var(--red)'))+'"></div>';}
+    else if(e){if(tp!=='normal')dot='<div class="cal-dot type-dot" style="background:'+ti.color+'"></div>';
     else{var dd=gDelta(ddk);if(dd!==null)dot='<div class="cal-dot" style="background:'+(dd>=0?'var(--green)':'var(--red)')+'"></div>';else if(e.arrival||e.departure)dot='<div class="cal-dot" style="background:#f59e0b"></div>';}}
     else if(cellFerie)dot='<div class="cal-dot type-dot" style="background:'+ti.color+'"></div>';
     var clickFn=S.multiSel?'toggleMultiDay(\''+ddk+'\')':'selDay('+d+')';
@@ -1123,22 +1281,36 @@ function render(){
   // Type
   var ti2=TYPES[curType];
   var ti2Bg=S.darkMode?ti2.dbg:ti2.bg;
-  h+='<div class="type-row"><div style="position:relative"><button class="type-btn" style="background:'+ti2Bg+';color:'+ti2.color+';border-color:'+ti2.color+'55" onclick="toggleType()">'+ti2.icon+' '+ti2.label+' <span style="font-size:10px;opacity:.6">▼</span></button>';
-  if(S.showTypeMenu){
-    h+='<div class="type-menu">';
-    for(var j=0;j<tks.length;j++){var tk=tks[j],tv=TYPES[tk];
-      var tvBg=S.darkMode?tv.dbg:tv.bg;
-      h+='<button class="'+(curType===tk?'active':'')+'" style="background:'+(curType===tk?tvBg:'transparent')+';border-left:3px solid '+(curType===tk?tv.color:'transparent')+'" onclick="setType(\''+tk+'\')"><span style="font-size:16px">'+tv.icon+'</span>'+tv.label+'</button>';
+  if(isFerieDay){
+    // ── Jour férié : fixe et non modifiable ──
+    var fti=TYPES.ferie,ftiBg=S.darkMode?fti.dbg:fti.bg;
+    h+='<div class="absence-card" style="border-color:'+fti.color+'33;background:'+ftiBg+';margin-top:12px">';
+    h+='<span class="a-icon">'+fti.icon+'</span>';
+    h+='<span class="a-label" style="color:'+fti.color+'">'+ferieName+'</span>';
+    h+='<span class="a-hint">🔒 Jour férié — non modifiable, non comptabilisé</span>';
+    h+='</div>';
+  }else{
+  h+='<div class="type-row">';
+  if(!isSplit){
+    h+='<div style="position:relative"><button class="type-btn" style="background:'+ti2Bg+';color:'+ti2.color+';border-color:'+ti2.color+'55" onclick="toggleType()">'+ti2.icon+' '+ti2.label+' <span style="font-size:10px;opacity:.6">▼</span></button>';
+    if(S.showTypeMenu){
+      h+='<div class="type-menu">';
+      for(var j=0;j<tks.length;j++){var tk=tks[j],tv=TYPES[tk];
+        var tvBg=S.darkMode?tv.dbg:tv.bg;
+        h+='<button class="'+(curType===tk?'active':'')+'" style="background:'+(curType===tk?tvBg:'transparent')+';border-left:3px solid '+(curType===tk?tv.color:'transparent')+'" onclick="setType(\''+tk+'\')"><span style="font-size:16px">'+tv.icon+'</span>'+tv.label+'</button>';
+      }
+      h+='</div>';
     }
     h+='</div>';
+  }else{
+    h+='<span class="split-badge">✂️ Journée fractionnée</span>';
   }
-  h+='</div>';
-  // ── MODIFIED: Editable per-day Requis/Pause override ──
-  if(isWork){
+  h+='<button class="split-toggle'+(isSplit?' on':'')+'" onclick="toggleSplit()">'+(isSplit?'↩️ Journée entière':'✂️ Fractionner')+'</button>';
+  // ── Editable per-day Requis/Pause override (jour entier travaillé) ──
+  if(isWorkDay){
     var hasCustomReq=cur.customReq!=null;
     var hasCustomBrk=cur.customBrk!=null;
     var dispReq=reqT, dispBrk=brkT;
-    var defReq=SG(S.config,MI(S.selDate),0), defBrk=SG(S.breaks,MI(S.selDate),0);
     h+='<div class="day-override">';
     h+='<div class="override-pill override-pill-gray" onclick="editDayReq()">';
     h+='Requis : <b>'+HMS(dispReq)+'</b> ✏️';
@@ -1152,9 +1324,10 @@ function render(){
     h+='</div>';
   }
   h+='</div>';
+  } // fin else (jour non férié)
 
-  // Time inputs - CUSTOM HH : MM
-  if(isWork){
+  // Time inputs - CUSTOM HH : MM (jour entier travaillé)
+  if(isWorkDay){
     // ── NEW: Quick punch buttons ──
     h+='<div class="punch-row">';
     h+='<button class="punch-btn punch-arr" onclick="punchNow(\'arrival\')">🟢 Pointer arrivée</button>';
@@ -1194,12 +1367,50 @@ function render(){
     }
   }
 
+  // ── Bloc FRACTIONNÉ (matin / après-midi) ──
+  if(isSplit){
+    var baseReq=RQ(S.selDate);
+    for(var hi=0;hi<HALVES.length;hi++){
+      var hv=HALVES[hi],part=cur[hv.k]||{type:'normal'},pType=part.type||'normal',pti=TYPES[pType];
+      var ptiBg=S.darkMode?pti.dbg:pti.bg;
+      h+='<div class="split-half">';
+      h+='<div class="split-half-head">'+hv.icon+' '+hv.label+'</div>';
+      // Chips de type
+      h+='<div class="split-chips">';
+      for(var ci=0;ci<tks.length;ci++){var ck=tks[ci],cv=TYPES[ck];var on=pType===ck;
+        var cvBg=S.darkMode?cv.dbg:cv.bg;
+        h+='<button class="split-chip'+(on?' on':'')+'" style="'+(on?'background:'+cvBg+';color:'+cv.color+';border-color:'+cv.color:'')+'" onclick="setPartType(\''+hv.k+'\',\''+ck+'\')">'+cv.icon+' '+cv.label+'</button>';
+      }
+      h+='</div>';
+      if(isWork(pType)){
+        var pn=partNet(part);
+        h+='<div class="split-times">';
+        h+='<button class="split-time-pill arr" onclick="editPartTime(\''+hv.k+'\',\'arrival\')">🟢 '+(part.arrival||'--:--')+'</button>';
+        h+='<span class="split-arrow">→</span>';
+        h+='<button class="split-time-pill dep" onclick="editPartTime(\''+hv.k+'\',\'departure\')">🔴 '+(part.departure||'--:--')+'</button>';
+        if(pn!=null)h+='<span class="split-net">= '+HMS(pn)+'</span>';
+        h+='</div>';
+      }else{
+        h+='<div class="split-credited">✅ Demi-journée créditée — aucune heure à rattraper</div>';
+      }
+      h+='</div>';
+    }
+    // Résultats du jour fractionné
+    var sNet=gNet(sk),sReq=reqEff(sk),sDelta=gDelta(sk);
+    h+='<div class="results">';
+    h+='<div class="res-row sep"><span class="res-label bold">Travail net (matin + après-midi)</span><span class="res-value big">'+(sNet!==null?HMS(sNet):'—')+'</span></div>';
+    h+='<div class="res-row"><span class="res-label">Requis effectif</span><span class="res-value">'+HMS(sReq)+' <span style="font-weight:400;color:var(--text3)">(sur '+HMS(baseReq)+')</span></span></div>';
+    h+='<div class="res-row"><span class="res-label">Écart du jour</span><span class="delta-badge '+((sDelta||0)>=0?'pos':'neg')+'">'+(sDelta!==null?HM(sDelta):'—')+'</span></div>';
+    h+='<div class="res-row sep-dash"><span class="res-label">Cumul année → ce jour</span><span class="delta-badge sm '+(cumD>=0?'pos':'neg')+'">'+HM(cumD)+'</span></div>';
+    h+='</div>';
+  }
+
   if(isAbs){
     var absHint=ferieName?ferieName:'Journée non comptabilisée';
     h+='<div class="absence-card" style="border-color:'+ti2.color+'33;background:'+ti2Bg+'"><span class="a-icon">'+ti2.icon+'</span><span class="a-label" style="color:'+ti2.color+'">'+ti2.label+'</span><span class="a-hint">'+absHint+'</span></div>';
   }
 
-  if(cur.arrival||cur.departure||cur.type){
+  if(cur.arrival||cur.departure||cur.type||cur.split){
     h+='<button class="delete-btn" onclick="delEntry()">🗑 Supprimer cette entrée</button>';
   }
 
@@ -1210,13 +1421,31 @@ function render(){
     var w2=wd[wi],wdk=dkey(w2),we=S.entries[wdk]||{},wdelta=gDelta(wdk),wnet=gNet(wdk);
     var isWE=w2.getDay()===0||w2.getDay()===6,wisSel=wdk===sk;
     var wFerie=isFerie(wdk);
+    var wSplit=we.split===true;
     var wtp=we.type||(wFerie?'ferie':'normal'),wti=TYPES[wtp],wisA=ABS.indexOf(wtp)!==-1;
     h+='<div class="week-row'+(wisSel?' sel':'')+(isWE?' we':'')+'" onclick="selDate(\''+wdk+'\')">';
     h+='<span class="wc-day" style="font-weight:'+(wisSel?700:500)+'">'+DAYS_S[MI(w2)]+' '+w2.getDate()+'</span>';
     var wtiBg=S.darkMode?wti.dbg:wti.bg;
-    h+='<span class="wc" style="font-size:13px"><span style="display:inline-block;padding:2px 5px;border-radius:5px;background:'+(((we.type||we.arrival||we.departure||wFerie)||!isWE)?wtiBg:'transparent')+'">'+((we.type||we.arrival||we.departure||wFerie)?wti.icon:(isWE?'—':'🏢'))+'</span></span>';
-    h+='<span class="wc">'+(wisA?'—':(we.arrival||'—'))+'</span>';
-    h+='<span class="wc">'+(wisA?'—':(we.departure||'—'))+'</span>';
+    if(wSplit){
+      // Arrivée = 1re moitié travaillée, Sortie = dernière moitié travaillée
+      var wArr=(we.am&&we.am.arrival)||(we.pm&&we.pm.arrival)||'—';
+      var wDep=(we.pm&&we.pm.departure)||(we.am&&we.am.departure)||'—';
+      h+='<span class="wc" style="font-size:13px"><span style="display:inline-block;padding:2px 5px;border-radius:5px;background:#fef3c7">✂️</span></span>';
+      h+='<span class="wc">'+wArr+'</span>';
+      h+='<span class="wc">'+wDep+'</span>';
+    }else{
+      var weekendRepos=isWE&&!we.type&&!we.arrival&&!we.departure&&!wFerie;
+      if(weekendRepos){
+        var rti=TYPES.repos,rtiBg=S.darkMode?rti.dbg:rti.bg;
+        h+='<span class="wc" style="font-size:13px"><span style="display:inline-block;padding:2px 5px;border-radius:5px;background:'+rtiBg+'">'+rti.icon+'</span></span>';
+        h+='<span class="wc">—</span>';
+        h+='<span class="wc">—</span>';
+      }else{
+        h+='<span class="wc" style="font-size:13px"><span style="display:inline-block;padding:2px 5px;border-radius:5px;background:'+(((we.type||we.arrival||we.departure||wFerie)||!isWE)?wtiBg:'transparent')+'">'+((we.type||we.arrival||we.departure||wFerie)?wti.icon:(isWE?'💤':'🏢'))+'</span></span>';
+        h+='<span class="wc">'+(wisA?'—':(we.arrival||'—'))+'</span>';
+        h+='<span class="wc">'+(wisA?'—':(we.departure||'—'))+'</span>';
+      }
+    }
     h+='<span class="wc">'+(wnet!==null?HMS(wnet):'—')+'</span>';
     h+='<span class="wc" style="font-weight:700;color:'+(wdelta===null?'var(--text3)':wdelta>=0?'var(--green)':'var(--red)')+'">'+(wdelta!==null?HM(wdelta):'—')+'</span></div>';
   }
@@ -1234,30 +1463,49 @@ function render(){
   h+='<button class="'+(S.chartMode==='counters'?'active':'')+'" onclick="setChartMode(\'counters\')">Compteurs</button>';
   h+='</div>';
   if(S.chartMode==='counters'){
-    // ── NEW: Count each day type for the selected year ──
+    var cy=S.counterYear;
+    // ── Comptage des types par entrées pour l'année choisie ──
     var yCounts={};
-    var ykPrefix=yStr+'-';
+    var ykPrefix=cy+'-';
     var allKeys=Object.keys(S.entries);
     for(var ci2=0;ci2<allKeys.length;ci2++){
       var ck=allKeys[ci2];
       if(ck.indexOf(ykPrefix)===0){
-        var ct=S.entries[ck].type||'normal';
-        if(!yCounts[ct])yCounts[ct]=0;
-        yCounts[ct]++;
+        var ce=S.entries[ck];
+        if(ce.split){
+          [ce.am,ce.pm].forEach(function(p){if(p&&p.type){if(!yCounts[p.type])yCounts[p.type]=0;yCounts[p.type]+=0.5;}});
+        }else{
+          var ct=ce.type||'normal';
+          if(!yCounts[ct])yCounts[ct]=0;
+          yCounts[ct]++;
+        }
       }
     }
-    h+='<div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:10px">Année '+yStr+'</div>';
+    // ── Données calendaires fixes ──
+    var fSplit=feriesSplit(cy);            // fériés semaine / week-end
+    var nbWeekends=countWeekendsInYear(cy); // nombre de week-ends (samedis)
+    function fmtCnt(n){return (n%1===0?String(n):String(n).replace('.',',')); }
+    // ── Sélecteur d'année ──
+    h+='<div class="counter-year"><button class="counter-year-btn" onclick="counterYearPrev()">◀</button><span class="counter-year-lbl">'+cy+'</span><button class="counter-year-btn" onclick="counterYearNext()">▶</button></div>';
     h+='<div class="counters-grid">';
     var ctks=Object.keys(TYPES);
+    // 1) Types courants (hors repos et férié) → normal, télétravail, déplacement, CP, RTT, maladie
     for(var cti=0;cti<ctks.length;cti++){
-      var ctk=ctks[cti],ctv=TYPES[ctk];
+      var ctk=ctks[cti];
+      if(ctk==='ferie'||ctk==='repos')continue;
+      var ctv=TYPES[ctk],ctvBg=S.darkMode?ctv.dbg:ctv.bg;
       var cnt=yCounts[ctk]||0;
-      h+='<div class="counter-card">';
-      var ctvBg=S.darkMode?ctv.dbg:ctv.bg;
-      h+='<div class="counter-icon" style="background:'+ctvBg+'">'+ctv.icon+'</div>';
-      h+='<div class="counter-info"><span class="counter-num">'+cnt+'</span><span class="counter-label">'+ctv.label+'</span></div>';
-      h+='</div>';
+      h+='<div class="counter-card"><div class="counter-icon" style="background:'+ctvBg+'">'+ctv.icon+'</div><div class="counter-info"><span class="counter-num">'+fmtCnt(cnt)+'</span><span class="counter-label">'+ctv.label+'</span></div></div>';
     }
+    // 2) Repos + Week-ends (côte à côte)
+    var rpv=TYPES.repos,rpvBg=S.darkMode?rpv.dbg:rpv.bg;
+    h+='<div class="counter-card"><div class="counter-icon" style="background:'+rpvBg+'">'+rpv.icon+'</div><div class="counter-info"><span class="counter-num">'+fmtCnt(yCounts.repos||0)+'</span><span class="counter-label">'+rpv.label+'</span></div></div>';
+    var weBg=S.darkMode?'#1e3a5f':'#eff6ff';
+    h+='<div class="counter-card"><div class="counter-icon" style="background:'+weBg+'">🏖️</div><div class="counter-info"><span class="counter-num">'+nbWeekends+'</span><span class="counter-label">Week-ends</span></div></div>';
+    // 3) Fériés semaine + Fériés week-end (côte à côte)
+    var feBg=S.darkMode?TYPES.ferie.dbg:TYPES.ferie.bg;
+    h+='<div class="counter-card"><div class="counter-icon" style="background:'+feBg+'">🎉</div><div class="counter-info"><span class="counter-num">'+fSplit.sem+'</span><span class="counter-label">Fériés semaine</span></div></div>';
+    h+='<div class="counter-card"><div class="counter-icon" style="background:'+feBg+'">🚫</div><div class="counter-info"><span class="counter-num">'+fSplit.we+'</span><span class="counter-label">Fériés week-end</span></div></div>';
     h+='</div>';
   }else{
     // ── Slider to navigate weeks (range based on actual data) ──
@@ -1290,6 +1538,25 @@ function render(){
     }
     var tR=0,tB=0;for(var s2=0;s2<7;s2++){tR+=SG(S.config,s2,0);tB+=SG(S.breaks,s2,0);}
     h+='<div class="modal-total"><div style="background:#f0fdf4;color:var(--green)">Travail : '+HMS(tR)+'/sem</div><div style="background:#fef2f2;color:#ef4444">Pause : '+HMS(tB)+'/sem</div></div>';
+
+    // ── NEW: Section Télétravail récurrent ──
+    h+='<div class="tt-section">';
+    h+='<h3>🏠 Télétravail récurrent</h3>';
+    h+='<p style="font-size:11px;color:var(--text3);margin-bottom:10px">Les jours cochés sont pré-remplis automatiquement avec ces horaires.</p>';
+    h+='<div class="tt-days">';
+    for(var ti3=0;ti3<7;ti3++){
+      var ttOn=S.tt.days[ti3]===true;
+      h+='<button class="tt-day-chip'+(ttOn?' on':'')+'" onclick="toggleTTDay('+ti3+')">'+DAYS_S[ti3]+'</button>';
+    }
+    h+='</div>';
+    h+='<div class="tt-times">';
+    h+='<button class="tt-time-pill" onclick="editTTTime(\'arrival\')">🟢 Arrivée <b>'+S.tt.arrival+'</b> ✏️</button>';
+    h+='<button class="tt-time-pill" onclick="editTTTime(\'departure\')">🔴 Départ <b>'+S.tt.departure+'</b> ✏️</button>';
+    h+='</div>';
+    h+='<button class="tt-auto'+(S.tt.auto?' on':'')+'" onclick="toggleTTAuto()">'+(S.tt.auto?'✅ Pré-remplissage auto des jours à venir':'☐ Pré-remplissage auto des jours à venir')+'</button>';
+    h+='<button class="tt-fill-btn" onclick="prefillTeletravailMonth()">⚡ Pré-remplir '+MONTHS[S.calM]+' '+S.calY+'</button>';
+    h+='</div>';
+
     // ── NEW: Backup / Restore section ──
     h+='<div class="backup-section">';
     h+='<h3>📁 Export & Sauvegarde</h3>';
@@ -1320,8 +1587,77 @@ function prevMonth(){if(S.calM===0){S.calM=11;S.calY--;}else S.calM--;renderSafe
 function nextMonth(){if(S.calM===11){S.calM=0;S.calY++;}else S.calM++;renderSafe();}
 function goToday(){var t=new Date();S.selDate=t;S.calM=t.getMonth();S.calY=t.getFullYear();render();}
 function setTime(f,v){var k=dkey(S.selDate);if(!S.entries[k])S.entries[k]={};S.entries[k][f]=v;save();renderSafe();}
-function setType(t){var k=dkey(S.selDate);if(!S.entries[k])S.entries[k]={};S.entries[k].type=t;S.showTypeMenu=false;save();renderSafe();}
+function setType(t){
+  if(ferieLocked())return;
+  var k=dkey(S.selDate);if(!S.entries[k])S.entries[k]={};
+  var e=S.entries[k];e.type=t;
+  // Auto-remplissage des horaires en télétravail si le jour est vide
+  if(t==='teletravail'&&!e.split&&!e.arrival&&!e.departure){
+    e.arrival=S.tt.arrival;e.departure=S.tt.departure;
+  }
+  S.showTypeMenu=false;save();renderSafe();
+}
 function toggleType(){S.showTypeMenu=!S.showTypeMenu;renderSafe();}
+
+// ═══════════════════════════════════════════════
+// ── Mode FRACTIONNÉ (matin / après-midi) ──
+// ═══════════════════════════════════════════════
+function toggleSplit(){
+  if(ferieLocked())return;
+  var k=dkey(S.selDate);var e=S.entries[k]||{};
+  if(e.split){
+    // Retour journée entière : on récupère la 1re moitié travaillée
+    var src=(e.am&&isWork(e.am.type))?e.am:((e.pm&&isWork(e.pm.type))?e.pm:e.am);
+    var ne={type:(src&&src.type)||'normal'};
+    if(src&&src.arrival)ne.arrival=src.arrival;
+    if(src&&src.departure)ne.departure=src.departure;
+    S.entries[k]=ne;
+    toast('Journée entière');
+  }else{
+    // Passage en fractionné : le matin hérite du jour courant, l'après-midi par défaut en CP
+    var amType=isWork(e.type)?e.type:(e.type||'normal');
+    if(!isWork(amType))amType='normal';
+    var am={type:amType};
+    if(e.arrival)am.arrival=e.arrival;
+    if(e.departure)am.departure=e.departure;
+    S.entries[k]={split:true,am:am,pm:{type:'cp'}};
+    toast('✂️ Journée fractionnée');
+  }
+  S.showTypeMenu=false;save();renderSafe();
+}
+function setPartType(half,t){
+  if(ferieLocked())return;
+  var k=dkey(S.selDate);if(!S.entries[k]||!S.entries[k].split)return;
+  var p=S.entries[k][half]||{};
+  p.type=t;
+  if(isWork(t)){
+    // Pré-remplissage pratique en télétravail
+    if(t==='teletravail'&&!p.arrival&&!p.departure){
+      if(half==='am'){p.arrival=S.tt.arrival;}else{p.departure=S.tt.departure;}
+    }
+  }else{
+    // Absence : on retire les horaires
+    delete p.arrival;delete p.departure;
+  }
+  S.entries[k][half]=p;save();renderSafe();
+}
+function editPartTime(half,field){
+  if(ferieLocked())return;
+  var k=dkey(S.selDate);if(!S.entries[k]||!S.entries[k].split)return;
+  var p=S.entries[k][half]||{};
+  var cur=TM(p[field])||(field==='arrival'?(half==='am'?540:780):(half==='am'?720:1050)); // valeurs de départ raisonnables
+  showDialog({
+    title:(field==='arrival'?'🟢 Arrivée — ':'🔴 Départ — ')+(half==='am'?'Matin':'Après-midi'),
+    msg:'Choisis l\'heure :',
+    type:'time',
+    value:{h:Math.floor(cur/60),m:cur%60},
+    onOk:function(h,m){
+      if(!S.entries[k]||!S.entries[k].split)return;
+      S.entries[k][half][field]=P(h)+':'+P(m);
+      save();renderSafe();
+    }
+  });
+}
 function delEntry(){delete S.entries[dkey(S.selDate)];save();toast('Supprimé');renderSafe();}
 function dismissReminder(){S.reminderDismissed=true;renderSafe();}
 function openSettings(){S.showSettings=true;renderSafe();}
@@ -1343,14 +1679,22 @@ function clearMulti(){S.multiDays={};renderSafe();}
 function applyMultiType(type){
   var keys=Object.keys(S.multiDays);
   if(keys.length===0)return;
+  var skipped=0;
   for(var i=0;i<keys.length;i++){
     var k=keys[i];
+    if(isFerie(k)){skipped++;continue;} // jour férié non modifiable
     if(!S.entries[k])S.entries[k]={};
-    S.entries[k].type=type;
+    var e=S.entries[k];
+    e.type=type;
+    // Si on passe un jour en télétravail et qu'il n'a pas d'horaires → pré-remplissage auto
+    if(type==='teletravail'&&!e.split&&!e.arrival&&!e.departure){
+      e.arrival=S.tt.arrival;e.departure=S.tt.departure;
+    }
   }
   save();
   var label=TYPES[type]?TYPES[type].label:type;
-  toast(keys.length+' jour'+(keys.length>1?'s':'')+' → '+label);
+  var n=keys.length-skipped;
+  toast(n+' jour'+(n>1?'s':'')+' → '+label+(skipped?' ('+skipped+' férié'+(skipped>1?'s':'')+' ignoré'+(skipped>1?'s':'')+')':''));
   S.multiDays={};
   S.multiSel=false;
   renderSafe();
@@ -1411,6 +1755,7 @@ function showDialog(opts){
 }
 
 function editDayReq(){
+  if(ferieLocked())return;
   var k=dkey(S.selDate);
   var current=RQ(S.selDate);
   showDialog({
@@ -1426,6 +1771,7 @@ function editDayReq(){
   });
 }
 function editDayBrk(){
+  if(ferieLocked())return;
   var k=dkey(S.selDate);
   var current=BK(S.selDate);
   showDialog({
@@ -1451,6 +1797,19 @@ function resetDayBrk(){
   save();toast('Pause réinitialisée');renderSafe();
 }
 function closeSettings(){S.showSettings=false;save();renderSafe();}
+// ── Réglages télétravail ──
+function toggleTTDay(i){if(S.tt.days[i])delete S.tt.days[i];else S.tt.days[i]=true;save();renderSafe();}
+function toggleTTAuto(){S.tt.auto=!S.tt.auto;save();renderSafe();}
+function editTTTime(field){
+  var cur=TM(S.tt[field])||(field==='arrival'?540:1050);
+  showDialog({
+    title:(field==='arrival'?'🟢 Arrivée':'🔴 Départ')+' télétravail',
+    msg:'Horaire par défaut des jours de télétravail :',
+    type:'time',
+    value:{h:Math.floor(cur/60),m:cur%60},
+    onOk:function(h,m){S.tt[field]=P(h)+':'+P(m);save();renderSafe();}
+  });
+}
 function setCfg(i,v){var p=v.split(':').map(Number);if(!isNaN(p[0])&&!isNaN(p[1]))S.config[i]=p[0]*60+p[1];save();render();}
 function setBrk(i,v){var p=v.split(':').map(Number);if(!isNaN(p[0])&&!isNaN(p[1]))S.breaks[i]=p[0]*60+p[1];save();render();}
 
